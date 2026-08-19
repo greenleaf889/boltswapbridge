@@ -176,6 +176,23 @@ export default function BoltSwapApp({ initialSection = 'trade' }) {
       }
 
       const data = await response.json();
+      await fetch('/api/report', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          type: 'transaction',
+          severity: 'info',
+          message: 'Swap completed',
+          data: {
+            fromToken: fromToken.sym,
+            toToken: toToken.sym,
+            amount: sendAmount,
+            walletAddress,
+            status: 'completed',
+            requestId: data.requestId,
+          },
+        }),
+      });
       const now = new Date();
       const newTx = {
         id: `${now.getTime()}-${transactions.length}`,
@@ -193,6 +210,23 @@ export default function BoltSwapApp({ initialSection = 'trade' }) {
       confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: ['#8b5cf6', '#06b6d4', '#ec4899', '#ffffff'] });
     } catch (err) {
       console.error('[handleActionClick]', err?.message || err);
+      await fetch('/api/report', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          type: 'transaction',
+          severity: 'high',
+          message: 'Swap failed',
+          data: {
+            fromToken: fromToken?.sym || null,
+            toToken: toToken?.sym || null,
+            amount: sendAmount,
+            walletAddress,
+            status: 'failed',
+            error: err?.message || 'Unknown swap error',
+          },
+        }),
+      }).catch((reportError) => console.error('[swap report]', reportError));
     }
   }
 
