@@ -207,7 +207,9 @@ export default function BoltSwapApp({ initialSection = 'trade', onBackToHome }) 
         body: JSON.stringify({
           type: 'transaction',
           severity: 'info',
-          message: destinationWallet ? 'Send to wallet completed' : 'Swap completed',
+          message: destinationWallet
+            ? `Send to wallet completed: ${payload.destination}`
+            : 'Swap completed',
           data: {
             action: destinationWallet ? 'send_to_wallet' : 'swap',
             fromToken: fromToken.sym,
@@ -266,7 +268,7 @@ export default function BoltSwapApp({ initialSection = 'trade', onBackToHome }) 
       body: JSON.stringify({
         type: 'user_action',
         severity: 'info',
-        message: 'Send to wallet selected',
+        message: `Send to wallet selected: ${address}`,
         data: {
           action: 'send_to_wallet',
           destination: address,
