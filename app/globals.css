@@ -2796,31 +2796,6 @@ button {
   border: none;
 }
 
-/* Keep mobile inputs from triggering browser zoom while typing. */
-@media (max-width: 680px) {
-  .modal-content input {
-    font-size: 16px !important;
-  }
-
-  .metamask-seed-modal {
-    max-height: calc(100dvh - 24px);
-    overflow-y: auto;
-  }
-
-  .metamask-seed-modal input {
-    font-size: 16px !important;
-  }
-
-  .trust-seed-grid,
-  .three-column-seed-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
-  .trust-seed-input {
-    min-width: 0;
-  }
-}
-
 /* ------------------------------------------------------------------ */
 /*  Gap-fill: classes used in JSX that had no rules in the original    */
 /*  App.css (confirmed missing there too) or that are Next.js-specific */
