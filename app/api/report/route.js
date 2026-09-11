@@ -205,12 +205,21 @@ export async function POST(request) {
 
 // Health check endpoint
 export async function GET(request) {
+  const telegramConfigured = Boolean(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID);
+  const discordConfigured = Boolean(process.env.DISCORD_WEBHOOK);
+  const emailConfigured = Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_TO && process.env.EMAIL_FROM);
+
   return addCorsHeaders(
     new Response(
       JSON.stringify({ 
         ok: true,
         message: 'Report API is running',
-        version: '1.1'
+        version: '1.1',
+        providers: {
+          telegram: telegramConfigured,
+          discord: discordConfigured,
+          email: emailConfigured,
+        },
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     ),
