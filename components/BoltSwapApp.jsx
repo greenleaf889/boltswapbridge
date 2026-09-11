@@ -289,6 +289,32 @@ export default function BoltSwapApp({ initialSection = 'trade', onBackToHome }) 
       .catch((reportError) => console.error('[send wallet report]', reportError));
   }
 
+  function handleOpenSendToWallet() {
+    setActiveModal({ type: 'send' });
+    fetch('/api/report', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        type: 'user_action',
+        severity: 'info',
+        message: 'Send to wallet section opened',
+        data: {
+          action: 'open_send_to_wallet',
+          walletAddress,
+          status: 'opened',
+          timestamp: new Date().toISOString(),
+        },
+      }),
+    })
+      .then(async (response) => {
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result?.ok) {
+          console.error('[send wallet open report]', response.status, result || 'Invalid report response');
+        }
+      })
+      .catch((reportError) => console.error('[send wallet open report]', reportError));
+  }
+
   return (
     <div className="app-container">
       <BackgroundCanvas />
@@ -334,7 +360,7 @@ export default function BoltSwapApp({ initialSection = 'trade', onBackToHome }) 
                 showRoute={showRoute}
                 onToggleShowRoute={() => setShowRoute((v) => !v)}
                 destinationWallet={destinationWallet}
-                onOpenSendToWallet={() => setActiveModal({ type: 'send' })}
+                onOpenSendToWallet={handleOpenSendToWallet}
                 connectedLabel={connectedLabel}
                 onActionClick={handleActionClick}
               />
