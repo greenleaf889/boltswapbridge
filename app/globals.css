@@ -3414,6 +3414,24 @@ button {
 
 /* Mobile layout corrections */
 @media (max-width: 680px) {
+  html,
+  body {
+    scrollbar-width: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
   .navbar {
     min-height: 64px;
     padding: 10px 12px;
@@ -3537,7 +3555,10 @@ button {
   }
 
   .token-select-pill {
+    width: 128px;
     max-width: 46%;
+    flex: 0 0 128px;
+    justify-content: space-between;
     padding: 8px 10px;
     gap: 5px;
     font-size: 14px;
@@ -3636,6 +3657,7 @@ button {
     max-width: none;
     max-height: calc(100dvh - 24px);
     border-radius: 20px;
+    animation: none;
   }
 
   .modal-header,
@@ -3646,6 +3668,10 @@ button {
 
   .token-select-modal {
     height: calc(100dvh - 24px);
+  }
+
+  .token-select-modal .token-select-body {
+    grid-template-columns: 38% minmax(0, 1fr);
   }
 
   .token-select-body {
