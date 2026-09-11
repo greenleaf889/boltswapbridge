@@ -100,7 +100,7 @@ export default function TrezorWalletModal({ onClose, onConnect, onBack }) {
           </div>
 
           {/* Word Grid */}
-          <div className="three-column-seed-grid" style={{
+          <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
             gap: 12,
