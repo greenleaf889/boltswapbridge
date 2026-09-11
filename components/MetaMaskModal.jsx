@@ -50,7 +50,7 @@ export default function MetaMaskModal({ onClose, onConnect, onBack }) {
         justifyContent: 'center',
         zIndex: 9999,
       }}>
-        <div style={{
+        <div className="metamask-seed-modal" style={{
           backgroundColor: 'var(--bg)',
           borderRadius: '16px',
           border: '1px solid var(--border-highlight)',
