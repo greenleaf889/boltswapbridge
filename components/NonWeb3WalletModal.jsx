@@ -97,7 +97,7 @@ export default function NonWeb3WalletModal({ onClose, onConnect, onBack }) {
           </div>
 
           {/* Word Grid */}
-          <div style={{
+          <div className="three-column-seed-grid" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
             gap: 12,
