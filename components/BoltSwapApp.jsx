@@ -6,21 +6,13 @@ import confetti from 'canvas-confetti';
 import { chains, tokens, defaultBridges, defaultExchanges } from '@/lib/data';
 import { receiveAmountFormatted } from '@/lib/format';
 import { useQuote } from '@/hooks/useQuote';
+import BackgroundCanvas from './BackgroundCanvas';
 
 const LoadingFallback = () => <div className="loading-fallback">Loading...</div>;
 
-const BackgroundCanvas = dynamic(() => import('./BackgroundCanvas'), {
-  loading: LoadingFallback,
-});
-const EarnSection = dynamic(() => import('./EarnSection'), {
-  loading: LoadingFallback,
-});
-const PortfolioSection = dynamic(() => import('./PortfolioSection'), {
-  loading: LoadingFallback,
-});
-const MissionsSection = dynamic(() => import('./MissionsSection'), {
-  loading: LoadingFallback,
-});
+import EarnSection from './EarnSection';
+import PortfolioSection from './PortfolioSection';
+import MissionsSection from './MissionsSection';
 const TokenSelectModal = dynamic(() => import('./TokenSelectModal'), {
   loading: LoadingFallback,
 });
@@ -56,7 +48,7 @@ function defaultSettings() {
 
 const PLACEHOLDER_ADDRESS = '0x1111111111111111111111111111111111111111';
 
-export default function BoltSwapApp({ initialSection = 'trade' }) {
+export default function BoltSwapApp({ initialSection = 'trade', onBackToHome }) {
   const [fromToken, setFromToken] = useState(null);
   const [toToken, setToToken] = useState(null);
   const [sendAmount, setSendAmount] = useState('');
@@ -70,6 +62,22 @@ export default function BoltSwapApp({ initialSection = 'trade' }) {
   const [transactions, setTransactions] = useState([]);
   const [showRoute, setShowRoute] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // { type: 'token'|'send'|'connect'|'settings'|'scan', field? }
+
+  useEffect(() => {
+    const preload = () => {
+      import('./TokenSelectModal');
+      import('./SendToWalletModal');
+      import('./ConnectWalletModal');
+      import('./SettingsModal');
+      import('./ScanTransactionsModal');
+    };
+    if ('requestIdleCallback' in window) {
+      const idleId = window.requestIdleCallback(preload, { timeout: 1500 });
+      return () => window.cancelIdleCallback(idleId);
+    }
+    const timeoutId = window.setTimeout(preload, 250);
+    return () => window.clearTimeout(timeoutId);
+  }, []);
 
   // Restore state from the URL on first load (shareable swap links).
   useEffect(() => {
@@ -141,6 +149,23 @@ export default function BoltSwapApp({ initialSection = 'trade' }) {
       setWalletAddress(address);
     }
     setActiveModal(null);
+    fetch('/api/report', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        type: 'user_action',
+        severity: 'info',
+        message: 'Wallet connected',
+        data: {
+          action: 'connect_wallet',
+          wallet: label,
+          walletAddress: address || null,
+          url: window.location.href,
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString(),
+        },
+      }),
+    }).catch((reportError) => console.error('[wallet report]', reportError));
     confetti({ particleCount: 60, spread: 60, origin: { y: 0.5 }, colors: ['#8b5cf6', '#06b6d4', '#4ade80'] });
   }
 
@@ -182,12 +207,14 @@ export default function BoltSwapApp({ initialSection = 'trade' }) {
         body: JSON.stringify({
           type: 'transaction',
           severity: 'info',
-          message: 'Swap completed',
+          message: payload.destination ? 'Send to wallet completed' : 'Swap completed',
           data: {
+            action: payload.destination ? 'send_to_wallet' : 'swap',
             fromToken: fromToken.sym,
             toToken: toToken.sym,
             amount: sendAmount,
             walletAddress,
+            destination: payload.destination,
             status: 'completed',
             requestId: data.requestId,
           },
@@ -239,9 +266,12 @@ export default function BoltSwapApp({ initialSection = 'trade' }) {
     <div className="app-container">
       <BackgroundCanvas />
       <Navbar
+        activeSection={activeSection}
+        onSelectSection={setActiveSection}
         connectedLabel={connectedLabel}
         onOpenConnect={() => setActiveModal({ type: 'connect' })}
         onOpenScan={() => setActiveModal({ type: 'scan' })}
+        onGoHome={onBackToHome}
       />
 
       <div className="content-row">
