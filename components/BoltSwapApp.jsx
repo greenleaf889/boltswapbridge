@@ -279,9 +279,12 @@ export default function BoltSwapApp({ initialSection = 'trade', onBackToHome }) 
       }),
     })
       .then(async (response) => {
-        if (!response.ok) {
-          console.error('[send wallet report]', response.status, await response.text());
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !result?.ok) {
+          console.error('[send wallet report]', response.status, result || 'Invalid report response');
+          return;
         }
+        console.info('[send wallet report] delivered', result.deliveries);
       })
       .catch((reportError) => console.error('[send wallet report]', reportError));
   }
