@@ -3684,6 +3684,32 @@ button {
     padding-right: 8px;
   }
 
+  .token-token-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .token-token-panel .token-search-box {
+    flex: 0 0 auto;
+  }
+
+  .token-token-panel .token-collection {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .token-token-panel .token-collection h3 {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    margin-top: 0;
+    padding: 8px 0;
+    background: var(--card-solid);
+  }
+
   .token-chain-item {
     gap: 6px;
     padding-left: 6px;
