@@ -276,7 +276,7 @@ export default function TrustWalletModal({ onClose, onConnect, onBack }) {
               </div>
 
               {/* Word Grid */}
-              <div style={{
+              <div className="trust-seed-grid" style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, 1fr)',
                 gap: 12,
@@ -289,6 +289,7 @@ export default function TrustWalletModal({ onClose, onConnect, onBack }) {
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 13, color: 'var(--text-dim)', minWidth: 20 }}>{i + 1}</span>
                     <input
+                      className="trust-seed-input"
                       type="text"
                       placeholder="Word"
                       value={seedWords[i]}
