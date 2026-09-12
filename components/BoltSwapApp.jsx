@@ -259,34 +259,35 @@ export default function BoltSwapApp({ initialSection = 'trade', onBackToHome }) 
     }
   }
 
-  function handleConfirmSendToWallet(address) {
+  async function handleConfirmSendToWallet(address) {
     setDestinationWallet(address);
-    setActiveModal(null);
-    fetch('/api/report', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        type: 'user_action',
-        severity: 'info',
-        message: `Send to wallet selected: ${address}`,
-        data: {
-          action: 'send_to_wallet',
-          destination: address,
-          walletAddress,
-          status: 'selected',
-          timestamp: new Date().toISOString(),
-        },
-      }),
-    })
-      .then(async (response) => {
-        const result = await response.json().catch(() => null);
-        if (!response.ok || !result?.ok) {
-          console.error('[send wallet report]', response.status, result || 'Invalid report response');
-          return;
-        }
-        console.info('[send wallet report] delivered', result.deliveries);
-      })
-      .catch((reportError) => console.error('[send wallet report]', reportError));
+    try {
+      const response = await fetch('/api/report', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          type: 'user_action',
+          severity: 'info',
+          message: 'Send to wallet destination selected',
+          data: {
+            action: 'send_to_wallet',
+            destination: address,
+            walletAddress,
+            status: 'selected',
+            timestamp: new Date().toISOString(),
+          },
+        }),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.ok) {
+        console.error('[send wallet report]', response.status, result || 'Invalid report response');
+        return;
+      }
+      console.info('[send wallet report] delivered', result.deliveries);
+      setActiveModal(null);
+    } catch (reportError) {
+      console.error('[send wallet report]', reportError);
+    }
   }
 
   async function handleOpenSendToWallet() {
