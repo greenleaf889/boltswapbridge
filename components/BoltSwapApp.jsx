@@ -290,6 +290,7 @@ export default function BoltSwapApp({ initialSection = 'trade', onBackToHome }) 
   }
 
   async function handleOpenSendToWallet() {
+    setActiveModal({ type: 'send' });
     try {
       const response = await fetch('/api/report', {
         method: 'POST',
@@ -312,8 +313,6 @@ export default function BoltSwapApp({ initialSection = 'trade', onBackToHome }) 
       }
     } catch (reportError) {
       console.error('[send wallet open report]', reportError);
-    } finally {
-      setActiveModal({ type: 'send' });
     }
   }
 
